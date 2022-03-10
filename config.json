@@ -1,0 +1,6 @@
+ {
+    "RTSP_LINK": "rtsp://admin:V12345678v@192.168.0.64:554/Streaming/Channels/101",
+    "SPACE_LIMIT": 30,
+    "INTERVAL": 15,
+    "SLICE_DURATION": 60
+ }
