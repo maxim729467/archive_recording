@@ -7,13 +7,16 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "clean": "node cleanup.js",
-    "kill": "killall -9 node"
+    "kill": "killall -9 node",
+    "concat": "node concat.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "fast-folder-size": "^1.6.1",
+    "moment": "^2.29.1",
+    "mv": "^2.1.1",
     "nodemon": "^2.0.15"
   }
 }

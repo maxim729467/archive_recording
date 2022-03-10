@@ -3,16 +3,27 @@ const path = require("path");
 const fs = require("fs");
 const getFolderSize = require("fast-folder-size");
 const config = require("./config.json");
+const { mergeSlices } = require("./concat");
 
 const RTSP_LINK = config.RTSP_LINK;
 const SPACE_LIMIT = config.SPACE_LIMIT;
 const INTERVAL = config.INTERVAL * 60 * 1000;
+const CONCAT_INTERVAL = config.CONCAT_INTERVAL * 60 * 1000;
 const SLICE_DURATION = config.SLICE_DURATION;
 
 const gigabyte = 1073741824;
 const archivePath = path.join(__dirname, "/archive");
 
 let isRecordingTriggered = false;
+
+const clearFragmentsAndRecreateFolder = () => {
+  try {
+    execSync(`rm -rf ${archivePath}`);
+    fs.mkdirSync(archivePath);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 if (!fs.existsSync(archivePath)) {
   fs.mkdirSync(archivePath);
@@ -29,15 +40,14 @@ setInterval(() => {
 
     if (bytes > SPACE_LIMIT * gigabyte) {
       console.log("cleaning space...");
-      try {
-        execSync(`rm -rf ${archivePath}`);
-        fs.mkdirSync(archivePath);
-      } catch (error) {
-        console.log(error);
-      }
+      clearFragmentsAndRecreateFolder();
     }
   });
 }, INTERVAL);
+
+setInterval(() => {
+  mergeSlices();
+}, CONCAT_INTERVAL);
 
 const startRecording = () => {
   try {
