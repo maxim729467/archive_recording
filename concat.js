@@ -6,7 +6,6 @@ const mv = require("mv");
 
 const archivePath = path.join(__dirname, "./archive");
 const storagePath = path.join(__dirname, "./storage");
-const txtFileContent = [];
 const instruction = "concat.txt";
 let currentPath, destinationPath;
 
@@ -87,6 +86,8 @@ const concatSlices = () => {
 };
 
 const mergeSlices = () => {
+  const txtFileContent = [];
+
   fs.readdir(archivePath, function (err, files) {
     if (err) {
       return console.log("Unable to scan directory: " + err);

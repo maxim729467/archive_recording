@@ -7,22 +7,26 @@ const { mergeSlices } = require("./concat");
 
 const RTSP_LINK = config.RTSP_LINK;
 const SPACE_LIMIT = config.SPACE_LIMIT;
-const INTERVAL = config.INTERVAL * 60 * 1000;
+const SPACE_CHECK_INTERVAL = config.SPACE_CHECK_INTERVAL * 60 * 1000;
 const CONCAT_INTERVAL = config.CONCAT_INTERVAL * 60 * 1000;
 const SLICE_DURATION = config.SLICE_DURATION;
 
 const gigabyte = 1073741824;
 const archivePath = path.join(__dirname, "/archive");
-
+const storagePath = path.join(__dirname, "./storage");
 let isRecordingTriggered = false;
 
-const clearFragmentsAndRecreateFolder = () => {
-  try {
-    execSync(`rm -rf ${archivePath}`);
-    fs.mkdirSync(archivePath);
-  } catch (error) {
-    console.log(error);
-  }
+const clearSpace = () => {
+  fs.readdir(storagePath, (err, files) => {
+    if (err) return console.log("Unable to scan directory: " + err);
+
+    const numberOfFilesToRemove = Math.ceil(files.length / 5);
+
+    files.forEach((file, index) => {
+      if (index + 1 > numberOfFilesToRemove) return;
+      fs.unlinkSync(path.join(storagePath, `/${file}`));
+    });
+  });
 };
 
 if (!fs.existsSync(archivePath)) {
@@ -31,19 +35,17 @@ if (!fs.existsSync(archivePath)) {
 
 setInterval(() => {
   getFolderSize(archivePath, (err, bytes) => {
-    if (err) {
-      throw err;
-    }
+    if (err) console.log(err);
 
     console.log("folder size in bytes ===>", bytes);
     console.log("space limit in bytes ===>", SPACE_LIMIT * gigabyte);
 
     if (bytes > SPACE_LIMIT * gigabyte) {
       console.log("cleaning space...");
-      clearFragmentsAndRecreateFolder();
+      clearSpace();
     }
   });
-}, INTERVAL);
+}, SPACE_CHECK_INTERVAL);
 
 setInterval(() => {
   mergeSlices();
