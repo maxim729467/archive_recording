@@ -29,12 +29,8 @@ const clearSpace = () => {
   });
 };
 
-if (!fs.existsSync(archivePath)) {
-  fs.mkdirSync(archivePath);
-}
-
 setInterval(() => {
-  getFolderSize(archivePath, (err, bytes) => {
+  getFolderSize(storagePath, (err, bytes) => {
     if (err) console.log(err);
 
     console.log("folder size in bytes ===>", bytes);
@@ -117,4 +113,6 @@ const connectToCamera = () => {
   }
 };
 
+
+if (!fs.existsSync(archivePath)) fs.mkdirSync(archivePath);
 connectToCamera();
