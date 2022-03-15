@@ -7,8 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "clean": "node cleanup.js",
-    "kill": "killall -9 node",
-    "concat": "node concat.js"
+    "kill": "killall -9 node"
   },
   "keywords": [],
   "author": "",
