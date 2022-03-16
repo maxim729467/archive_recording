@@ -1,21 +1,16 @@
 const fs = require("fs");
 const getFolderSize = require("fast-folder-size");
-const config = require("./config.json");
 const variables = require("./variables");
 const ArchiveService = require("./archiveService");
 const services = [];
 
 const checkDirectories = () => {
-  if (!fs.existsSync(variables.archivePath))
-    fs.mkdirSync(variables.archivePath);
-  if (!fs.existsSync(variables.storagePath))
-    fs.mkdirSync(variables.storagePath);
+  if (!fs.existsSync(variables.archivePath)) fs.mkdirSync(variables.archivePath);
+  if (!fs.existsSync(variables.storagePath)) fs.mkdirSync(variables.storagePath);
 };
 
 const createArchiveServices = () => {
-  const cameras = config.RTSP_LINKS;
-
-  cameras.forEach((camera) => {
+  variables.RTSP_LINKS.forEach((camera) => {
     const archiveService = new ArchiveService(camera.link, camera.name);
     services.push(archiveService);
     archiveService.init();
