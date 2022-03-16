@@ -171,23 +171,8 @@ class ArchiveService {
   };
 
   init = () => {
-    if (!fs.existsSync(this.archivePath)) {
-      fs.mkdir(this.archivePath, (err) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-      });
-    }
-
-    if (!fs.existsSync(this.storagePath)) {
-      fs.mkdir(this.storagePath, (err) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-      });
-    }
+    if (!fs.existsSync(this.archivePath)) fs.mkdirSync(this.archivePath);
+    if (!fs.existsSync(this.storagePath)) fs.mkdirSync(this.storagePath);
 
     console.log("establishing connection with RTSP stream...");
     console.log(`camera name: ${this.name}`);
