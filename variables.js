@@ -1,7 +1,7 @@
 const path = require("path");
 const config = require("./config.json");
 
-const RTSP_LINK = config.RTSP_LINK;
+const RTSP_LINKS = config.RTSP_LINKS;
 const SPACE_LIMIT = config.SPACE_LIMIT;
 const SPACE_CHECK_INTERVAL = config.SPACE_CHECK_INTERVAL * 60 * 1000;
 const CONCAT_INTERVAL = config.CONCAT_INTERVAL * 60 * 1000;
@@ -13,7 +13,7 @@ const storagePath = path.join(__dirname, "./storage");
 const instruction = "concat.txt";
 
 module.exports = {
-  RTSP_LINK,
+  RTSP_LINKS,
   SPACE_LIMIT,
   SPACE_CHECK_INTERVAL,
   CONCAT_INTERVAL,
