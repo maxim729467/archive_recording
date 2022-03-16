@@ -25,7 +25,9 @@ class ArchiveService {
     }
   };
 
-  moveFile = (currentPath, destinationPath) => {
+  createAndFillStorage = (currentPath, destinationPath) => {
+    if (!fs.existsSync(this.storagePath)) fs.mkdirSync(this.storagePath);
+    
     mv(currentPath, destinationPath, (err) => {
       if (err) {
         console.log(err);
@@ -33,25 +35,6 @@ class ArchiveService {
         //   console.log("Successfully moved the file!");
       }
     });
-  };
-
-  createAndFillStorage = (currentPath, destinationPath) => {
-    if (fs.existsSync(this.storagePath)) {
-      this.moveFile(currentPath, destinationPath);
-      return;
-    }
-
-    fs.mkdir(this.storagePath, (err) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      this.moveFile(currentPath, destinationPath);
-    });
-  };
-
-  removeInstruction = () => {
-    fs.unlinkSync(path.join(__dirname, `/${this.instruction}`));
   };
 
   clearSpace = () => {
@@ -97,11 +80,11 @@ class ArchiveService {
           this.createAndFillStorage(currentPath, destinationPath);
           this.clearArchive();
         }
-        this.removeInstruction();
       });
     } catch (error) {
       console.log(error);
-      this.removeInstruction();
+    } finally {
+      fs.unlinkSync(path.join(__dirname, `/${this.instruction}`));
     }
   };
 
