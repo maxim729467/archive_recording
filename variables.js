@@ -1,5 +1,5 @@
 const path = require("path");
-const config = require("./config.json");
+const config = require("./config/config.json");
 
 const RTSP_LINKS = config.RTSP_LINKS;
 const SPACE_LIMIT = config.SPACE_LIMIT;
