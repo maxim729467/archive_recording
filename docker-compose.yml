@@ -4,7 +4,7 @@ services:
     privileged: true
     container_name: archive_service
 
-    #uncomment if you build from source
+    # uncomment if you build from source
     # build: .
     
     image: vcloudorg/archive_service:latest

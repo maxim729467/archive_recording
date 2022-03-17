@@ -11,4 +11,4 @@ CONFIG
 
 DOCKER
 
-Make sure to set up config in the same directory as your docker-compose file before running docker, otherwise it will through error trying to find config.json
+Make sure to set up config in the same directory as your docker-compose file before running docker, otherwise it will throw error trying to locate config.json
