@@ -27,7 +27,7 @@ class ArchiveService {
 
   createAndFillStorage = (currentPath, destinationPath) => {
     if (!fs.existsSync(this.storagePath)) fs.mkdirSync(this.storagePath);
-    
+
     mv(currentPath, destinationPath, (err) => {
       if (err) {
         console.log(err);
@@ -48,6 +48,10 @@ class ArchiveService {
         fs.unlinkSync(path.join(this.storagePath, `/${file}`));
       });
     });
+  };
+
+  deleteInstructionFile = () => {
+    fs.unlinkSync(path.join(__dirname, `/${this.instruction}`));
   };
 
   concatSlices = () => {
@@ -79,12 +83,12 @@ class ArchiveService {
         if (code === 0) {
           this.createAndFillStorage(currentPath, destinationPath);
           this.clearArchive();
+          this.deleteInstructionFile();
         }
       });
     } catch (error) {
       console.log(error);
-    } finally {
-      fs.unlinkSync(path.join(__dirname, `/${this.instruction}`));
+      this.deleteInstructionFile();
     }
   };
 

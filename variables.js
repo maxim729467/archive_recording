@@ -10,7 +10,6 @@ const SLICE_DURATION = config.SLICE_DURATION;
 const gigabyte = 1073741824;
 const archivePath = path.join(__dirname, "/temp_archive");
 const storagePath = path.join(__dirname, "./storage");
-const instruction = "concat.txt";
 
 module.exports = {
   RTSP_LINKS,
@@ -21,5 +20,4 @@ module.exports = {
   gigabyte,
   archivePath,
   storagePath,
-  instruction,
 };
