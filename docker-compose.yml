@@ -7,7 +7,7 @@ services:
     # uncomment if you build from source
     # build: .
     
-    image: vcloudorg/archive-service:latest
+    image: vcloudaiorg/archive-service:latest
     command: npm run start
     restart: unless-stopped
     volumes:
