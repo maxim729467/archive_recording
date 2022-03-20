@@ -145,10 +145,13 @@ class ArchiveService {
 
       child.on("close", (code) => {
         console.log("recording process finished with code " + code);
+        
 
-        if (code !== 0) return;
-        clearInterval(this.timer);
-        kill(child.pid);
+        // if (code !== 0) return;
+        // clearInterval(this.timer);
+        // kill(child.pid);
+
+        this.init();
       });
     } catch (error) {
       console.log(error);
@@ -192,7 +195,8 @@ class ArchiveService {
         }
 
         console.log("connecting process finished with code " + code);
-        kill(child.pid);
+        // kill(child.pid);
+        this.init();
       });
     } catch (error) {
       kill(child.pid);
