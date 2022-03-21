@@ -145,6 +145,9 @@ class ArchiveService {
 
       child.on("close", (code) => {
         console.log("recording process finished with code " + code);
+        console.log('PID of closed process ===>', child.pid);
+        kill(child.pid);
+        console.log(`reconnecting to camera \'${this.name}\'...`);
         
 
         // if (code !== 0) return;
@@ -195,8 +198,8 @@ class ArchiveService {
         }
 
         console.log("connecting process finished with code " + code);
-        // kill(child.pid);
         this.init();
+        kill(child.pid);
       });
     } catch (error) {
       kill(child.pid);
