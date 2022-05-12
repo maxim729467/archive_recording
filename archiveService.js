@@ -69,22 +69,25 @@ class ArchiveService {
     try {
       const child = spawn("ffmpeg", ffmpegArgs);
 
-      child.stdout.on("data", (data) => {
-        process.stdout.write(data.toString());
-      });
+      // child.stdout.on("data", (data) => {
+      //   process.stdout.write(data.toString());
+      // });
 
-      child.stderr.on("data", (data) => {
-        process.stdout.write(data.toString());
-      });
+      // child.stderr.on("data", (data) => {
+      //   process.stdout.write(data.toString());
+      // });
 
       child.on("close", (code) => {
         // console.log("concatenating process finished with code " + code);
 
-        if (code === 0) {
+        if (!code) {
           this.createAndFillStorage(currentPath, destinationPath);
           this.clearArchive();
           this.deleteInstructionFile();
+          return;
         }
+
+        this.deleteInstructionFile();
       });
     } catch (error) {
       console.log(error);
@@ -135,26 +138,26 @@ class ArchiveService {
         );
 
       const child = spawn("ffmpeg", ffmpegArgs);
-      child.stdout.on("data", (data) => {
-        process.stdout.write(data.toString());
-      });
+      // child.stdout.on("data", (data) => {
+      //   process.stdout.write(data.toString());
+      // });
 
-      child.stderr.on("data", (data) => {
-        process.stdout.write(data.toString());
-      });
+      // child.stderr.on("data", (data) => {
+      //   process.stdout.write(data.toString());
+      // });
 
       child.on("close", (code) => {
-        console.log("recording process finished with code " + code);
-        console.log('PID of closed process ===>', child.pid);
-        kill(child.pid);
-        console.log(`reconnecting to camera \'${this.name}\'...`);
-        
+        if (code) {
+          console.log("=======================");
+          console.log("recording process finished with code " + code);
+          console.log("PID of closed process ===>", child.pid);
+          kill(child.pid);
+          clearInterval(this.timer);
 
-        // if (code !== 0) return;
-        // clearInterval(this.timer);
-        // kill(child.pid);
-
-        this.init();
+          console.log(`reconnecting to camera \'${this.name}\'...`);
+          this.init();
+          console.log("=======================");
+        }
       });
     } catch (error) {
       console.log(error);
@@ -170,7 +173,7 @@ class ArchiveService {
     console.log("establishing connection with RTSP stream...");
     console.log(`camera name: ${this.name}`);
     console.log("\n");
-    let isRecordingTriggered = false;
+    // let isRecordingTriggered = false;
 
     const ffprobeArgs =
       `-stimeout 20 -v quiet -print_format json -show_format -show_streams ${this.link}`.split(
@@ -179,27 +182,34 @@ class ArchiveService {
     try {
       const child = spawn("ffprobe", ffprobeArgs);
 
-      child.stdout.on("data", (data) => {
-        process.stdout.write(data.toString());
-        if (isRecordingTriggered) return;
-        this.startRecording();
-        isRecordingTriggered = true;
-      });
+      // child.stdout.on("data", (data) => {
+      //   process.stdout.write(data.toString());
+      //   if (isRecordingTriggered) return;
+      //   this.startRecording();
+      //   isRecordingTriggered = true;
+      // });
 
-      child.stderr.on("data", (data) => {
-        process.stdout.write(data.toString());
-        this.init();
-      });
+      // child.stderr.on("data", (data) => {
+      //   process.stdout.write(data.toString());
+      //   this.init();
+      // });
 
       child.on("close", (code) => {
-        if (code === 0) {
-          console.log("connection is successful");
+        if (!code) {
+          console.log(`connection to camera "${this.name}" is successful`);
+          this.startRecording();
           return;
         }
 
+        console.log("===============================");
         console.log("connecting process finished with code " + code);
-        this.init();
+        console.log("reiniting connection to camera: " + this.name);
         kill(child.pid);
+        console.log("===============================");
+
+        setTimeout(() => {
+          this.init();
+        }, 3000);
       });
     } catch (error) {
       kill(child.pid);

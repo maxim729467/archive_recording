@@ -1,7 +1,7 @@
  {
     "RTSP_LINKS": [
       { 
-         "link":"rtsp://admin:V12345678v@192.168.0.64:554/Streaming/Channels/101",
+         "link":"rtsp://admin:admin@192.168.0.100:554/user=admin_password=6QNMIQGe_channel=1_stream=0.sdp?real_stream",
           "name":"window" 
       },
       {
@@ -11,6 +11,6 @@
    ],
     "SPACE_LIMIT": 20,
     "SPACE_CHECK_INTERVAL": 15,
-    "SLICE_DURATION": 10,
-    "CONCAT_INTERVAL": 30
+    "SLICE_DURATION": 0.25,
+    "CONCAT_INTERVAL": 1
  }
