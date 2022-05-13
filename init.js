@@ -3,6 +3,7 @@ const getFolderSize = require("fast-folder-size");
 const variables = require("./variables");
 const ArchiveService = require("./archiveService");
 const services = [];
+const { logger, logs } = require('./logger');
 
 const checkDirectories = () => {
   if (!fs.existsSync(variables.archivePath)) fs.mkdirSync(variables.archivePath);
@@ -19,21 +20,21 @@ const createArchiveServices = () => {
 
 const checkSpaceLimit = () => {
   getFolderSize(variables.storagePath, (err, bytes) => {
-    if (err) console.log(err);
+    if (err) logger.addLog(logs.ERROR, error);
 
-    console.log("folder size in bytes ===>", bytes);
-    console.log(
-      "space limit in bytes ===>",
-      variables.SPACE_LIMIT * variables.gigabyte
-    );
+    logger.addLog(logs.DIVIDER);
+    logger.addLog(logs.TIMESTAMP);
+    logger.addLog(logs.INFO, "folder size in bytes ===>" + bytes);
+    logger.addLog(logs.INFO, `space limit in bytes ===> ${variables.SPACE_LIMIT * variables.gigabyte}`);
 
     if (bytes > variables.SPACE_LIMIT * variables.gigabyte) {
-      console.log("cleaning space...");
+      logger.addLog(logs.INFO, "cleaning space");
 
       services.forEach((service) => {
         service.clearSpace();
       });
     }
+    logger.addLog(logs.DIVIDER);
   });
 };
 

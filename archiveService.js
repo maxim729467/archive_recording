@@ -5,6 +5,7 @@ const fs = require("fs");
 const mv = require("mv");
 const kill = require("tree-kill");
 const variables = require("./variables");
+const { logger, logs } = require("./logger");
 
 class ArchiveService {
   constructor(link, name) {
@@ -21,7 +22,7 @@ class ArchiveService {
       execSync(`rm -rf ${this.archivePath}`);
       fs.mkdirSync(this.archivePath);
     } catch (error) {
-      console.log(error);
+      logger.addLog(logs.ERROR, error);
     }
   };
 
@@ -30,16 +31,17 @@ class ArchiveService {
 
     mv(currentPath, destinationPath, (err) => {
       if (err) {
-        console.log(err);
+        logger.addLog(logs.ERROR, error);
       } else {
-        //   console.log("Successfully moved the file!");
+        logger.addLog(logs.SUCCESS, "Successfully moved the file!");
       }
     });
   };
 
   clearSpace = () => {
     fs.readdir(`${this.storagePath}`, (err, files) => {
-      if (err) return console.log("Unable to scan directory: " + err);
+      if (err)
+        return logger.addLog(logs.ERROR, "Unable to scan directory: " + err);
 
       const numberOfFilesToRemove = Math.ceil(files.length / 5);
 
@@ -69,16 +71,16 @@ class ArchiveService {
     try {
       const child = spawn("ffmpeg", ffmpegArgs);
 
-      // child.stdout.on("data", (data) => {
-      //   process.stdout.write(data.toString());
-      // });
-
       // child.stderr.on("data", (data) => {
       //   process.stdout.write(data.toString());
       // });
 
       child.on("close", (code) => {
-        // console.log("concatenating process finished with code " + code);
+        logger.addLog(logs.TIMESTAMP);
+        logger.addLog(
+          logs.SUCCESS,
+          "concatenating process finished with code " + code
+        );
 
         if (!code) {
           this.createAndFillStorage(currentPath, destinationPath);
@@ -90,7 +92,7 @@ class ArchiveService {
         this.deleteInstructionFile();
       });
     } catch (error) {
-      console.log(error);
+      logger.addLog(logs.ERROR, error);
       this.deleteInstructionFile();
     }
   };
@@ -99,7 +101,8 @@ class ArchiveService {
     const txtFileContent = [];
 
     fs.readdir(this.archivePath, (err, files) => {
-      if (err) return console.log("Unable to scan directory: " + err);
+      if (err)
+        return logger.addLog(logs.SUCCESS, "Unable to scan directory: " + err);
 
       files.forEach((file) => {
         const extCheck = /.ts$/gi;
@@ -125,8 +128,11 @@ class ArchiveService {
 
   startRecording = () => {
     try {
-      console.log("\n");
-      console.log("starting recording process...");
+      logger.addLog(logs.DIVIDER);
+      logger.addLog(logs.TIMESTAMP);
+      logger.addLog(logs.INFO, "recording archive");
+      logger.addLog(logs.DIVIDER);
+      logger.addLoader();
 
       this.timer = setInterval(() => {
         this.mergeSlices(this.name, this.instruction);
@@ -138,31 +144,30 @@ class ArchiveService {
         );
 
       const child = spawn("ffmpeg", ffmpegArgs);
-      // child.stdout.on("data", (data) => {
-      //   process.stdout.write(data.toString());
-      // });
 
-      // child.stderr.on("data", (data) => {
-      //   process.stdout.write(data.toString());
-      // });
+      child.stderr.on("data", (data) => {
+        process.stdout.write(data.toString());
+      });
 
       child.on("close", (code) => {
-        if (code) {
-          console.log("=======================");
-          console.log("recording process finished with code " + code);
-          console.log("PID of closed process ===>", child.pid);
-          kill(child.pid);
-          clearInterval(this.timer);
+        logger.addLog(logs.DIVIDER);
+        logger.addLog(
+          logs.ERROR,
+          "recording process finished with code " + code
+        );
+        logger.removeLoader();
+        logger.addLog(logs.INFO, `PID of closed process ===> ${child.pid}`);
+        kill(child.pid);
 
-          console.log(`reconnecting to camera \'${this.name}\'...`);
-          this.init();
-          console.log("=======================");
-        }
+        logger.addLog(logs.INFO, `reconnecting to camera \'${this.name}\'...`);
+        this.init();
+        logger.addLog(logs.DIVIDER);
       });
     } catch (error) {
-      console.log(error);
+      logger.addLog(logs.ERROR, error);
       clearInterval(this.timer);
       kill(child.pid);
+      logger.removeLoader();
     }
   };
 
@@ -170,10 +175,11 @@ class ArchiveService {
     if (!fs.existsSync(this.archivePath)) fs.mkdirSync(this.archivePath);
     if (!fs.existsSync(this.storagePath)) fs.mkdirSync(this.storagePath);
 
-    console.log("establishing connection with RTSP stream...");
-    console.log(`camera name: ${this.name}`);
-    console.log("\n");
-    // let isRecordingTriggered = false;
+    logger.addLog(logs.DIVIDER);
+    logger.addLog(logs.INFO, "establishing connection with RTSP stream");
+    logger.addLoader();
+    logger.addLog(logs.INFO, `camera name: "${this.name}"`);
+    logger.addLog(logs.DIVIDER);
 
     const ffprobeArgs =
       `-stimeout 20 -v quiet -print_format json -show_format -show_streams ${this.link}`.split(
@@ -182,30 +188,35 @@ class ArchiveService {
     try {
       const child = spawn("ffprobe", ffprobeArgs);
 
-      // child.stdout.on("data", (data) => {
-      //   process.stdout.write(data.toString());
-      //   if (isRecordingTriggered) return;
-      //   this.startRecording();
-      //   isRecordingTriggered = true;
-      // });
-
       // child.stderr.on("data", (data) => {
       //   process.stdout.write(data.toString());
-      //   this.init();
       // });
 
       child.on("close", (code) => {
+        logger.removeLoader();
+
         if (!code) {
-          console.log(`connection to camera "${this.name}" is successful`);
+          logger.addLog(
+            logs.SUCCESS,
+            `connection to camera "${this.name}" is successful`
+          );
           this.startRecording();
           return;
         }
 
-        console.log("===============================");
-        console.log("connecting process finished with code " + code);
-        console.log("reiniting connection to camera: " + this.name);
+        logger.addLog(logs.DIVIDER);
+        logger.addLog(
+          logs.ERROR,
+          "connecting process finished with code " + code
+        );
+
+        logger.addLog(
+          logs.INFO,
+          "reiniting connection to camera: " + this.name
+        );
+
         kill(child.pid);
-        console.log("===============================");
+        logger.addLog(logs.DIVIDER);
 
         setTimeout(() => {
           this.init();
