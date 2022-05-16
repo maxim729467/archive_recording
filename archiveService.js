@@ -77,18 +77,19 @@ class ArchiveService {
 
       child.on("close", (code) => {
         logger.addLog(logs.TIMESTAMP);
-        logger.addLog(
-          logs.SUCCESS,
-          "concatenating process finished with code " + code
-        );
 
         if (!code) {
+          logger.addLog(
+            logs.SUCCESS,
+            "concatenating process finished with code " + code
+          );
           this.createAndFillStorage(currentPath, destinationPath);
           this.clearArchive();
           this.deleteInstructionFile();
           return;
         }
 
+        logger.addLog(logs.ERROR, 'concatenating process failed with code' + code);
         this.deleteInstructionFile();
       });
     } catch (error) {
@@ -134,9 +135,11 @@ class ArchiveService {
       logger.addLog(logs.DIVIDER);
       logger.addLoader();
 
-      this.timer = setInterval(() => {
-        this.mergeSlices(this.name, this.instruction);
-      }, variables.CONCAT_INTERVAL);
+      if (!this.timer) {
+        this.timer = setInterval(() => {
+          this.mergeSlices(this.name, this.instruction);
+        }, variables.CONCAT_INTERVAL);
+      }
 
       const ffmpegArgs =
         `-stimeout 5000000 -loglevel error -rtsp_transport tcp -i ${this.link} -threads 1 -shortest -fflags shortest -c:v libx264 -profile:v main -crf 26 -preset veryfast -strict -2 -hls_time ${variables.SLICE_DURATION} -hls_start_number_source datetime -loglevel error -hls_flags append_list+program_date_time -master_pl_name output.m3u8 -strftime 1 -use_localtime 1 -hls_segment_filename ${this.archivePath}/slice_%Y-%m-%d_%H-%M-%S.ts ${this.archivePath}/stream.m3u8`.split(
@@ -153,11 +156,12 @@ class ArchiveService {
         logger.addLog(logs.DIVIDER);
         logger.addLog(
           logs.ERROR,
-          "recording process finished with code " + code
+          "recording process interrupted with code " + code
         );
         logger.removeLoader();
         logger.addLog(logs.INFO, `PID of closed process ===> ${child.pid}`);
         kill(child.pid);
+        clearInterval(this.timer);
 
         logger.addLog(logs.INFO, `reconnecting to camera \'${this.name}\'...`);
         this.init();
