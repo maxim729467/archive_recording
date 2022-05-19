@@ -1,4 +1,4 @@
-** If you run native app, make sure to have installed node and ffmpeg. **
+**If you run native app, make sure to have installed node and ffmpeg.**
 Script is based on node 14 and ffmpeg 4.4.1
 
 ## CONFIG
