@@ -24,7 +24,7 @@ const checkSpaceLimit = () => {
 
     logger.addLog(logs.DIVIDER);
     logger.addLog(logs.TIMESTAMP);
-    logger.addLog(logs.INFO, "folder size in bytes ===>" + bytes);
+    logger.addLog(logs.INFO, "folder size in bytes ===> " + bytes);
     logger.addLog(logs.INFO, `space limit in bytes ===> ${variables.SPACE_LIMIT * variables.gigabyte}`);
 
     if (bytes > variables.SPACE_LIMIT * variables.gigabyte) {
